@@ -13,14 +13,24 @@ float total;
 float difference;
 int ascending = 0;
 
-//flight state will represent which portion of flight OpenChute thinks it is in
-// 0 - prelaunch  (if altitude readings are relatively constant and no other flight state is reached)
-// 1 - ascent     (if altitude is increasing) 
-// 2 - descent    (if altitude was increasing and now is decreasing)
-// 3 - landed     (if altitude was decreasing and now is relatively constant)
-int flightstate = 0;
+double pos;
+double prevpos = 0;
+double vel;
+double prevvel = 0;
+double acc;
+double prevacc = 0;
+double t;
+double prevt = 0;
+double dt;
+float gain = 0.1;
+double filteredpos;
+double prevfilteredpos = 0;
+double filteredvel;
+double filteredprevvel = 0;
+double filteredacc;
+double filteredprevacc = 0;
+
 int counter;
-int cutoff;     //used to detect ascent and descent
 
 Servo myservo;
 
@@ -57,35 +67,79 @@ void loop() {
   }
   reading = total/5;
 
+  //Find delta t
+  t = millis() / 1000.0;
+  dt = (t - prevt);
+  prevt = t;
+  
+  //Get position data
+  pos = reading;
+  
+  //implement low pass filter
+  filteredpos = (1 - gain) * prevfilteredpos + (pos + prevpos) * gain / 2;
+  filteredvel = (filteredpos - prevfilteredpos) / dt;
+  filteredacc = (filteredvel - filteredprevvel) / dt;
+  vel = (pos - prevpos) / dt;
+  acc = (vel - prevvel) / dt;
+
+  //store current value as previous position
+  prevpos = pos;
+  prevvel = vel;
+  prevacc = acc;
+  prevfilteredpos = filteredpos;
+  filteredprevvel = filteredvel;
+  
+
   difference = prevreading - reading;
   prevreading = reading;
 
-  //Allow noise between -0.5 and 0.5 m difference
-  if(difference > 0.5){
-    ascending = 1;
-    cutoff += 1;
-  }else if(difference < -0.5){
-    ascending = -1;
-  }else{
-    ascending = 0;
-    cutoff -= 1;
-  }
 
-  if(cutoff > 7){
-    flightstate = 1;
-  }else if(cutoff < 7){
-    flightstate = 2;
-  }
-  Serial.print("Altitude: "); 
-  Serial.print(reading);
-  Serial.print(" m");
-  Serial.print("\t\tFlight State: ");
-  Serial.print(flightstate);
-  Serial.print("\t\tAscending?");
-  Serial.print(ascending);
-  Serial.print("\t\tDifference: ");
-  Serial.print(difference);
+  /*
+  Serial.print("Pos: "); 
+  Serial.print(pos);
+  Serial.print(" m \t");
+  Serial.print("Pos_f: "); 
+  Serial.print(filteredpos);
+  Serial.print(" m \t");
+  Serial.print("dPos: "); 
+  Serial.print(filteredpos - pos);
+  Serial.print(" m \t");
+  Serial.print("Vel: "); 
+  Serial.print(vel);
+  Serial.print(" m/s\t");
+  Serial.print("Acc: "); 
+  Serial.print(acc);
+  Serial.print(" m/s^2\t");
+  Serial.print("dt: "); 
+  Serial.print(dt);
+  Serial.print(" s\t");
+  Serial.print("t: "); 
+  Serial.print(t);
+  Serial.print(" s\t");
   Serial.println("");
+  */
+
+  //for serial plotting
+  /*
+  
+  Serial.print("position:");
+  Serial.print(pos);
+  Serial.print(" ");
+  Serial.print("filteredposition:");
+  Serial.print(filteredpos);
+  Serial.println(" ");
+
+  */
+  //*
+  
+  Serial.print("velocity:");
+  Serial.print(vel);
+  Serial.print(" ");
+  Serial.print("velocity_f:");
+  Serial.print(filteredvel);
+  Serial.println(" ");
+
+  //*/
   delay(100);
 
   if(reading > 150){
