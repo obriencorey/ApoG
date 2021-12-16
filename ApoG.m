@@ -3,21 +3,22 @@
 
 %load such that no headers are loaded.
 %Tdata = csvread('AeroTech_G64W.csv',5); %Units of seconds and newtons
-Tdata = csvread('AeroTech_H219T.csv',5);
+%Tdata = csvread('AeroTech_H219T.csv',5);
 %Tdata = csvread('AeroTech_I1299N.csv',5);
 %Tdata = csvread('Cesaroni_338I180-14A.csv',5);
+Tdata = csvread('AeroTech_L2200G.csv',5);
 fclose('all');
 
 t = Tdata(:,1);
 F = Tdata(:,2);
 
 %All inputs
-mass = 1.64; %kg;
+mass = 25; %kg;
 g = 9.81;
-refTemp = 288.15;
+refTemp = 288.15; %k
 
 %general geometric data
-noseconelength = 0.419;
+noseconelength = 0.419; 
 bodylength = 0.787 + 0.483; 
 bodydiameter = 4 / 39.37;
 
@@ -26,7 +27,7 @@ rootchord = 0.37;
 tipchord = 0.0856;
 span = 0.0965;
 finnumber = 3;
-avgchord = (0.37 + 0.0856);
+avgchord = (0.37 + 0.0856)/2;
 %calculate the area using average chord length and span
 finarea = .5 * avgchord * span;
 %reference area for CD calc
@@ -43,12 +44,12 @@ delayTime = 14;
 
 %assume CDmin on way up
 %CDmax on way down
-CDmin = 0.25;
-CDmax = 0.25;
+CDmin = 0.55;
+CDmax = 0.75;
 
 %From fruity chutes.com for 36" parachute
-CDparachute = .87;
-flighttime = 120; %seconds, estimate for the flight time
+CDparachute = 1.87;
+flighttime = 220; %seconds, estimate for the flight time
  
 
 %Resolution Modifier; makes thrust curve less discrete
@@ -76,7 +77,7 @@ density = 1.225*((refTemp)./ (refTemp + -0.0065.*(altitude))).^(1 + (g*0.0289644
 %temperature as function of altitude
 temperature = refTemp+ -0.0065.*(altitude);
 %dynamic viscosity as function of altitude
-mu = (1.458e-6.*temperature.^(3/2))./ (temperature + 110.4);
+mu = (1.458e-6.*temperature.^(3/2))./(temperature + 110.4);
 
 
 acceleration = zeros(n,1);
