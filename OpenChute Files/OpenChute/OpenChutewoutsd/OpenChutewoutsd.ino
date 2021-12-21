@@ -122,7 +122,7 @@ void loop() {
   */
 
   //for serial plotting
-  /*
+  
   
   Serial.print("position:");
   Serial.print(pos);
@@ -131,23 +131,17 @@ void loop() {
   Serial.print(filteredpos);
   Serial.println(" ");
 
-  */
-  //*
+ 
+  /*
   
   Serial.print("velocity:");
   Serial.print(vel);
-  Serial.print(" ");
+  Serial.print("   ");
   Serial.print("velocity_f:");
   Serial.print(filteredvel);
-  Serial.println(" ");
+  Serial.println("   ");
 
-  //*/
+  */
   delay(100);
-
-  if(reading > 150){
-    myservo.write(120);
-  }else{
-    myservo.write(0);
-  }
 
 }
