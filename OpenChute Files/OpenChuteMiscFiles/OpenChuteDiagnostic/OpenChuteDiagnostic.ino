@@ -270,7 +270,27 @@ void loop() {
 
   */
 
+  Serial.print("a_x ");
+  Serial.print(accel.acceleration.x - a_xoffset);
+  Serial.print(" ");
+  Serial.print("a_y ");
+  Serial.print(accel.acceleration.y - a_yoffset);
+  Serial.print(" ");
+  Serial.print("a_z ");
+  Serial.print(accel.acceleration.z - a_zoffset);
+  Serial.print(" ");
+  Serial.print("w_x ");
+  Serial.print(gyro.gyro.x - w_xoffset);
+  Serial.print(" ");
+  Serial.print("w_y ");
+  Serial.print(gyro.gyro.y - w_yoffset);
+  Serial.print(" ");
+  Serial.print("w_z ");
+  Serial.print(gyro.gyro.z - w_zoffset);
+  Serial.println(" ");
 
+
+  /*
   Serial.print("H(MSL): ");
   Serial.print(filteredpos);
   Serial.print(" m H(AGL): ");
@@ -291,8 +311,8 @@ void loop() {
   Serial.print(gyro.gyro.z - w_zoffset);
   Serial.println(" rad/s2 ");
   Serial.println(" ");
-
-
+  */
+  
   //logic to decide when to release parachute
   if((filteredpos - MSL) > releasealt + 20){
     chutearm = 1;

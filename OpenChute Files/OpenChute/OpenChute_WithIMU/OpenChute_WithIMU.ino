@@ -3,10 +3,13 @@
 #include <Adafruit_Sensor.h>
 #include "Adafruit_BMP3XX.h"
 #include <Servo.h>
+#include <Adafruit_LSM6DS33.h>
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 
 Adafruit_BMP3XX bmp;
+Adafruit_LSM6DS33 lsm6ds;
+Adafruit_Sensor *lsm_temp, *lsm_accel, *lsm_gyro;
 
 //variables to store sensor data
 float reading;
@@ -42,10 +45,20 @@ void setup() {
   Serial.begin(115200);
   while (!Serial);
 
-  //catch errors
+  //catch errors related to the barometer
   if (!bmp.begin_I2C()) { 
     Serial.println("Could not find a valid BMP3 sensor, check wiring!");
-    while (1);
+    while (1) {
+      delay(10);
+    }
+  }
+
+  //catch errors related to the IMU
+  if (!lsm6ds.begin_I2C()) {
+    Serial.println("Could not find a valid IMU sensor, check wiring!");
+    while (1) {
+      delay(10);
+    }
   }
 
   // Set up oversampling and filter initialization
@@ -53,6 +66,14 @@ void setup() {
   bmp.setPressureOversampling(BMP3_OVERSAMPLING_4X);
   bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_3);
   bmp.setOutputDataRate(BMP3_ODR_50_HZ);
+
+  // set up the IMU sensor reading pointers
+  lsm_temp = lsm6ds.getTemperatureSensor();
+  lsm_temp->printSensorDetails();
+  lsm_accel = lsm6ds.getAccelerometerSensor();
+  lsm_accel->printSensorDetails();
+  lsm_gyro = lsm6ds.getGyroSensor();
+  lsm_gyro->printSensorDetails();
 }
 
 void loop() {
@@ -95,6 +116,14 @@ void loop() {
   difference = prevreading - reading;
   prevreading = reading;
 
+  // now get data from the IMU
+  sensors_event_t accel;
+  sensors_event_t gyro;
+  sensors_event_t temp;
+  lsm_temp->getEvent(&temp);
+  lsm_accel->getEvent(&accel);
+  lsm_gyro->getEvent(&gyro);
+
 
   /*
   Serial.print("Pos: "); 
@@ -126,10 +155,17 @@ void loop() {
   
   Serial.print("Y:");
   Serial.print(pos);
-  Serial.print(" ");
-  Serial.print("\t\Y_f:");
+  Serial.print(" m ");
+  Serial.print("\tY_f:");
   Serial.print(filteredpos);
-  Serial.println(" ");
+  Serial.print(" m ");
+  Serial.print("\t\tw_x: ");
+  Serial.print(gyro.gyro.x);
+  Serial.print("\t\tw_y: ");
+  Serial.print(gyro.gyro.y);
+  Serial.print("\t\tw_z: ");
+  Serial.print(gyro.gyro.z);
+  Serial.println(" radians/s ");
 
  
   /*
